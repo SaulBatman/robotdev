@@ -19,7 +19,8 @@ fi
 
 SPOT_ID=$1
 # Load the spot config (for this SPOT_ID)
-source $repo_root/.spot_config
+# source $repo_root/.spot_config
+SPOT_WIFI_CLIENT_IP="138.16.161.21" # for gouger
 
 
 #------------- FUNCTIONS  ----------------
@@ -61,11 +62,11 @@ function detect_spot_connection
     false
 }
 
-SPOT_ADDITIONAL_BUILD_OPTIONS=""
+SPOT_ADDITIONAL_BUILD_OPTIONS="-Dfreenect2_DIR=$HOME/freenect2/lib/cmake/freenect2"
 SPOT_CMAKE_BUILD_TYPE="Release"
 function build_spot
 {
-    cd $repo_root/${SPOT_ROS_PATH}
+    cd ${SPOT_ROS_PATH}
 
     if catkin_make\
         --cmake-args\
@@ -92,7 +93,7 @@ function ping_spot
 
 function install_rtabmap_ros_from_source
 {
-    cd $repo_root/${SPOT_ROS_PATH}/src
+    cd ${SPOT_ROS_PATH}/src
     if [ ! -d "rtabmap_ros" ]; then
         git clone -b noetic-devel https://github.com/introlab/rtabmap_ros.git
     fi
@@ -209,14 +210,14 @@ else
     echo -e "If you want to build the spot project, run 'build_spot'"
 fi
 
-export ROS_PACKAGE_PATH=$repo_root/${SPOT_ROS_PATH}/src/:${ROS_PACKAGE_PATH}
+export ROS_PACKAGE_PATH=${SPOT_ROS_PATH}/src/:${ROS_PACKAGE_PATH}
 export PYTHONPATH=""
-source $repo_root/${SPOT_ROS_PATH}/devel/setup.bash
+source ${SPOT_ROS_PATH}/devel/setup.bash
 # We'd like to use packages in the virtualenv, what's already on /usr/lib,
 # and in the workspace (done by above step). NOTE: Using /usr/lib is
 # necessary so that PyKDL can be imported (it could only be installed
 # via sudo apt-get install python3-pykdl, for some unknown reason).
-export PYTHONPATH="$repo_root/${SPOT_PATH}/venv/spot/lib/python3.8/site-packages:${PYTHONPATH}:/usr/lib/python3/dist-packages"
+export PYTHONPATH="${SPOT_PATH}/venv/spot/lib/python3.8/site-packages:${PYTHONPATH}:/usr/lib/python3/dist-packages"
 if confirm "Are you working on the real robot ?"; then
     # Check if the environment variable SPOT_IP is set.
     # If not, then try to detect spot connection and set it.
